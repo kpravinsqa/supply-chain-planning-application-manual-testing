@@ -1,0 +1,60 @@
+TC ID,Module,Scenario ID,Req ID,Title,Preconditions,Steps,Test Data,Expected,Priority,Type,Cycle 1,Cycle 2,Defect,Automated Test
+TC_XPR_AUTH_001,AUTH,TS_XPR_AUTH_01,REQ-01,Planner login,,1. Log in as planner,,Workbench opens; badge 'Demand Planner',P1,Functional,Pass,Pass,,tests/ui/test_login.py::test_planner_login
+TC_XPR_AUTH_002,AUTH,TS_XPR_AUTH_01,REQ-01,Password not trimmed,,1. Log in with 'Plan@123 ' (trailing space),,Login rejected,P2,Security,Fail,Pass,DEF-XPR-05,tests/ui/test_login.py::test_invalid_login
+TC_XPR_AUTH_003,AUTH,TS_XPR_AUTH_01,REQ-01,Deep link without session,,1. Open /replenishment.html in a new private window,,Redirected to login,P2,Security,Pass,Pass,,tests/ui/test_login.py::test_unauthenticated_deep_link_redirects_to_login
+TC_XPR_AUTH_004,AUTH,TS_XPR_AUTH_02,REQ-02,Viewer cannot edit workbench,,"1. Log in as viewer
+2. Try to edit W5 cell",,All cells disabled,P1,Security,Pass,Pass,,tests/ui/test_demand_workbench.py::test_viewer_cannot_edit_grid
+TC_XPR_AUTH_005,AUTH,TS_XPR_AUTH_02,REQ-02,Viewer override via API,,1. PUT override with viewer token,,403 'Read-only users cannot change plans',P1,Security,Pass,Pass,,tests/api/test_planning_api.py::test_viewer_is_read_only
+TC_XPR_AUTH_006,AUTH,TS_XPR_AUTH_02,REQ-02,Viewer replenishment read-only,,"1. Log in as viewer
+2. Open Replenishment",,No checkboxes; qty fields disabled,P2,Security,Pass,Pass,,tests/ui/test_replenishment.py::test_viewer_sees_read_only_recommendations
+TC_XPR_DMD_001,DMD,TS_XPR_DMD_01,REQ-03,Initial grid and totals,,1. Open Demand Workbench,,"4 item-location rows; grand total 17,150; SKU-1001@DC-PUNE total 4,570",P1,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_grid_loads_with_statistical_totals
+TC_XPR_DMD_002,DMD,TS_XPR_DMD_01,REQ-03,Location filter recalculates grand total,,1. Filter DC-MUMBAI,,"2 rows; grand total 10,800",P2,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_location_filter
+TC_XPR_DMD_003,DMD,TS_XPR_DMD_02,REQ-04,W1 and W2 cells locked,,"1. Inspect W1, W2 cells",,Cells disabled with 'Frozen horizon' tooltip,P1,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_frozen_horizon_cells_are_locked
+TC_XPR_DMD_004,DMD,TS_XPR_DMD_02,REQ-04,API override in frozen week,,1. PUT override for W1,,422 'W1 is inside the frozen horizon and cannot be changed',P1,Negative,Fail,Pass,DEF-XPR-01,tests/api/test_planning_api.py::test_override_rules
+TC_XPR_DMD_005,DMD,TS_XPR_DMD_03,REQ-05,Override within threshold,,1. SKU-1001 W3: 560 → 600 (+7%),,"Saved; cell highlighted; row total 4,610; grand 17,190",P1,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_override_within_threshold_updates_totals
+TC_XPR_DMD_006,DMD,TS_XPR_DMD_03,REQ-05,Exactly ±20% needs no reason (BVA),,"1. SKU-2001 W5: 100 → 120
+2. then 100 → 80",,Both saved without reason,P1,Boundary,Fail,Pass,DEF-XPR-02,tests/ui/test_demand_workbench.py::test_override_at_exact_threshold_needs_no_reason
+TC_XPR_DMD_007,DMD,TS_XPR_DMD_03,REQ-05,±21% without reason rejected,,"1. SKU-2001 W5: 100 → 121
+2. then 100 → 79",,'A reason code is required for changes above 20%'; value reverted,P1,Boundary,Pass,Pass,,tests/ui/test_demand_workbench.py::test_override_above_threshold_requires_reason
+TC_XPR_DMD_008,DMD,TS_XPR_DMD_03,REQ-05,Large override with reason,,"1. Choose PROMOTION
+2. SKU-2001 W5 → 250",,Saved,P2,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_large_override_with_reason_code
+TC_XPR_DMD_009,DMD,TS_XPR_DMD_03,REQ-05,"Invalid values: negative, decimal, > 1,000,000",,"1. Enter -5
+2. 12.5
+3. 1000001",,"'Override must be a whole number between 0 and 1,000,000'",P2,Negative,Pass,Pass,,tests/ui/test_demand_workbench.py::test_invalid_override_values
+TC_XPR_DMD_010,DMD,TS_XPR_DMD_03,REQ-05,Override to zero needs reason,,"1. Enter 0 without reason
+2. then with SUPPLY_CONSTRAINT",,Rejected first; saved with reason,P2,Boundary,Pass,Pass,,tests/api/test_planning_api.py::test_override_to_zero_needs_reason
+TC_XPR_DMD_011,DMD,TS_XPR_DMD_03,REQ-05,Clear override reverts to statistical,,"1. Override W3 = 600
+2. Clear the cell",,Cell 560; highlight removed; totals restored,P2,Functional,Pass,Pass,,tests/ui/test_demand_workbench.py::test_clear_override_reverts_to_statistical
+TC_XPR_DMD_012,DMD,TS_XPR_DMD_04,REQ-05,Tab/Enter navigation commits edits,,"1. Edit W3
+2. press Tab
+3. Edit W4
+4. press Enter",,Both commits saved; focus moves right,P3,UI,Pass,Pass,,
+TC_XPR_DMD_013,DMD,TS_XPR_DMD_05,REQ-06,Override audit entry,,1. Override W6 610 → 900 with PROMOTION,,"Audit: week W6, from 610, to 900, reason, user, timestamp",P2,Functional,Pass,Pass,,tests/api/test_planning_api.py::test_override_audit_trail
+TC_XPR_INV_001,INV,TS_XPR_INV_01,REQ-07,95% service level reference,,"1. avg 100, σ 20, LT 9, SL 95%",,z 1.65; SS 99; ROP 999,P1,Functional,Pass,Pass,,tests/ui/test_inventory_policy.py::test_safety_stock_and_reorder_point
+TC_XPR_INV_002,INV,TS_XPR_INV_01,REQ-07,All service levels,,1. Repeat with SL 90/98/99,,SS 77/123/140; ROP 977/1023/1040,P1,Functional,Fail,Pass,DEF-XPR-03,tests/ui/test_inventory_policy.py::test_safety_stock_and_reorder_point
+TC_XPR_INV_003,INV,TS_XPR_INV_01,REQ-07,Zero variability,,"1. avg 50, σ 0, LT 14",,SS 0; ROP 700,P2,Boundary,Pass,Pass,,tests/ui/test_inventory_policy.py::test_safety_stock_and_reorder_point
+TC_XPR_INV_004,INV,TS_XPR_INV_01,REQ-07,Monotonic safety stock,,1. Calculate same inputs at 90→99%,,SS never decreases,P2,Functional,Pass,Pass,,tests/ui/test_inventory_policy.py::test_higher_service_level_never_lowers_safety_stock
+TC_XPR_INV_005,INV,TS_XPR_INV_02,REQ-08,Lead time 0 / 1 / 365 / 366,,1. Calculate with each lead time,,1 and 365 accepted; 0 and 366 rejected,P1,Boundary,Pass,Pass,,tests/ui/test_inventory_policy.py::test_policy_input_validation
+TC_XPR_INV_006,INV,TS_XPR_INV_02,REQ-08,Negative demand inputs,,"1. avg -1
+2. σ -2",,'Demand inputs cannot be negative' on the field,P2,Negative,Pass,Pass,,tests/ui/test_inventory_policy.py::test_policy_input_validation
+TC_XPR_REP_001,REP,TS_XPR_REP_01,REQ-09,Round up to MOQ multiple,,"1. Review SKU-1001 (req 1130, MOQ 250) and SKU-2001 (95, MOQ 48)",,"Recommended 1,250 and 96",P1,Functional,Pass,Pass,,tests/ui/test_replenishment.py::test_recommended_qty_rounded_up_to_moq
+TC_XPR_REP_002,REP,TS_XPR_REP_01,REQ-09,Exact multiple not rounded,,"1. Review SKU-3001 (2500, MOQ 500)",,"Recommended 2,500",P2,Boundary,Pass,Pass,,tests/ui/test_replenishment.py::test_recommended_qty_rounded_up_to_moq
+TC_XPR_REP_003,REP,TS_XPR_REP_02,REQ-09,Edit to valid multiple recalculates value,,1. SKU-1002 qty 500 → 700,,"Value $2,940.00",P2,Functional,Pass,Pass,,tests/ui/test_replenishment.py::test_edit_qty_to_moq_multiple_recalculates_value
+TC_XPR_REP_004,REP,TS_XPR_REP_02,REQ-09,Edit to non-multiple rejected,,1. SKU-1002 qty 650,,'Quantity must be a multiple of the MOQ (100)'; reverted,P2,Negative,Pass,Pass,,tests/ui/test_replenishment.py::test_edit_qty_not_multiple_of_moq_rejected
+TC_XPR_REP_005,REP,TS_XPR_REP_03,REQ-10,Bulk approve two recommendations,,"1. Tick #500 and #502
+2. Approve selected",,"Both APPROVED with PO-000500 / PO-000502; approved value $2,960.50",P1,Functional,Pass,Pass,,tests/ui/test_replenishment.py::test_bulk_approve_generates_po_numbers
+TC_XPR_REP_006,REP,TS_XPR_REP_03,REQ-10,Approval is atomic,,"1. Approve #500
+2. Then approve #500 and #501 together",,409; #501 remains PROPOSED,P1,Negative,Fail,Pass,DEF-XPR-04,tests/api/test_planning_api.py::test_cannot_approve_twice
+TC_XPR_REP_007,REP,TS_XPR_REP_04,REQ-11,Reject requires reason,,"1. Reject #503 with 'no'
+2. then 'Supplier on credit hold'",,First blocked; second REJECTED,P2,Negative,Pass,Pass,,tests/ui/test_replenishment.py::test_reject_requires_reason
+TC_XPR_REP_008,REP,TS_XPR_REP_03,REQ-10,Status filter,,"1. Approve one
+2. Filter APPROVED",,Exactly 1 row,P3,Functional,Pass,Pass,,tests/ui/test_replenishment.py::test_status_filter
+TC_XPR_SCN_001,SCN,TS_XPR_SCN_01,REQ-12,Uplift scenario math,,1. Create 'Diwali Peak' +15%,,"Baseline 17,150; scenario 19,722; delta +2,572",P1,Functional,Pass,Pass,,tests/ui/test_scenarios.py::test_create_uplift_scenario
+TC_XPR_SCN_002,SCN,TS_XPR_SCN_01,REQ-12,Baseline includes overrides,,"1. Override W3 to 600
+2. Create scenario 0%",,"Baseline 17,190",P1,Functional,Pass,Pass,,tests/ui/test_scenarios.py::test_scenario_baseline_includes_overrides
+TC_XPR_SCN_003,SCN,TS_XPR_SCN_02,REQ-12,Uplift boundaries −50/+100 and −51/+101,,1. Create scenarios with each value,,−50 and +100 accepted; −51 and +101 rejected,P2,Boundary,Pass,Pass,,tests/ui/test_scenarios.py::test_uplift_boundaries_accepted
+TC_XPR_SCN_004,SCN,TS_XPR_SCN_02,REQ-12,Duplicate name (case-insensitive) and delete,,"1. Create 'Monsoon'
+2. Create 'monsoon'
+3. Delete 'Monsoon'",,Duplicate rejected; delete leaves empty state,P2,Negative,Pass,Pass,,tests/ui/test_scenarios.py::test_duplicate_name_and_delete
+TC_XPR_SCN_005,SCN,TS_XPR_SCN_03,REQ-12,Compare two scenarios side by side,,"1. Create +10% and −10%
+2. Open compare view",,Weekly deltas shown per scenario,P3,Functional,Blocked,Pass,,
